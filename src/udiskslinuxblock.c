@@ -2211,6 +2211,19 @@ handle_format (UDisksBlock           *block,
   if (partition != NULL)
     {
       UDisksObject *partition_table_object;
+
+      /* Fail if partition contains a partition table (e.g. Fedora Hybrid ISO).
+       * See: https://bugs.freedesktop.org/show_bug.cgi?id=76178
+       */
+      if (udisks_partition_get_offset (partition) == 0)
+        {
+          g_dbus_method_invocation_return_error (invocation,
+                                                 UDISKS_ERROR,
+                                                 UDISKS_ERROR_NOT_SUPPORTED,
+                                                 "This partition cannot be modified because it contains a partition table; please reinitialize layout of the whole device.");
+          goto out;
+        }
+
       partition_table_object = udisks_daemon_find_object (daemon, udisks_partition_get_table (partition));
       if (partition_table_object == NULL)
         {
