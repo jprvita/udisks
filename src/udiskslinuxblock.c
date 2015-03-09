@@ -2176,7 +2176,6 @@ handle_format (UDisksBlock           *block,
   int status;
   uid_t caller_uid;
   gid_t caller_gid;
-  pid_t caller_pid;
   gboolean take_ownership = FALSE;
   gchar *encrypt_passphrase = NULL;
   gchar *erase_type = NULL;
@@ -2231,18 +2230,6 @@ handle_format (UDisksBlock           *block,
     }
 
   error = NULL;
-  if (!udisks_daemon_util_get_caller_pid_sync (daemon,
-                                               invocation,
-                                               NULL /* GCancellable */,
-                                               &caller_pid,
-                                               &error))
-    {
-      g_dbus_method_invocation_return_gerror (invocation, error);
-      g_error_free (error);
-      goto out;
-    }
-
-  error = NULL;
   if (!udisks_daemon_util_get_caller_uid_sync (daemon, invocation, NULL /* GCancellable */, &caller_uid, &caller_gid, NULL, &error))
     {
       g_dbus_method_invocation_return_gerror (invocation, error);
@@ -2280,7 +2267,7 @@ handle_format (UDisksBlock           *block,
             {
               action_id = "org.freedesktop.udisks2.modify-device-system";
             }
-          else if (!udisks_daemon_util_on_same_seat (daemon, object, caller_pid))
+          else if (!udisks_daemon_util_on_user_seat (daemon, object, caller_uid))
             {
               action_id = "org.freedesktop.udisks2.modify-device-other-seat";
             }
