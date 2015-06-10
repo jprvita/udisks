@@ -281,6 +281,7 @@ class UDisksTestCase(unittest.TestCase):
                  'ntfs': 'mkntfs'}
         label_opt = {'vfat': '-n',
                      'exfat': '-n',
+                     'f2fs': '-l',
                      'reiserfs': '-l'}
         extra_opt = {'vfat': ['-I', '-F', '32'],
                      'swap': ['-f'],
@@ -643,6 +644,10 @@ class FS(UDisksTestCase):
         '''fs: btrfs'''
         self._do_fs_check('btrfs')
 
+    def test_f2fs(self):
+        '''fs: f2fs'''
+        self._do_fs_check('f2fs')
+
     def test_minix(self):
         '''fs: minix'''
         self._do_fs_check('minix')
@@ -992,7 +997,7 @@ class FS(UDisksTestCase):
         except GLib.GError as e:
             if 'UDisks2.Error.NotSupported' in e.message:
                 # these fses are known to not support relabeling
-                self.assertIn(type, ['minix', 'btrfs'])
+                self.assertIn(type, ['minix', 'btrfs', 'f2fs'])
                 supported = False
             else:
                 raise
